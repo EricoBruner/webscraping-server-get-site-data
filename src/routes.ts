@@ -6,6 +6,7 @@ import { formattedText } from './utils/formattedText';
 export const routes = Router();
 
 routes.get('/', async(req, res) => {
+
   const { URL } = req.body;
 
   if (!URL) {
@@ -24,23 +25,26 @@ routes.get('/', async(req, res) => {
     const title = await page.title()
 
     const textPageOne = formattedText(await page.evaluate(() => 
-      document.querySelector("#post-1910 > div > div > div.thecontent > p:nth-child(1)")
+      document.querySelector('div > div > div > div.thecontent > p:nth-child(1)')
       ?.textContent)
     );
     const textPageTwo = formattedText(await page.evaluate(() => 
-      document.querySelector("#post-1910 > div > div > div.thecontent > p:nth-child(3)")
+      document.querySelector('div > div > div > div.thecontent > p:nth-child(3)')
       ?.textContent)
     );
     //
     const textPageThree = formattedText(await page.evaluate(() => 
-      document.querySelector("#post-1910 > div > div > div.thecontent > p:nth-child(5)")
+      document.querySelector('div > div > div > div.thecontent > p:nth-child(5)')
       ?.textContent)
     );
 
-    const textPageFour = JSON.stringify(await page.evaluate(() => 
-      document.querySelectorAll("ul")[1])
-    );
-    console.log((textPageFour))
+    // const textPageFour = await page.evaluate(() => 
+    //   document.querySelectorAll('ul').item(0).innerText)
+    
+    const textPageFour = await page.evaluate(() => {
+      return ([...document.querySelectorAll('ul')][0].innerText.split('\n'))
+    })
+    
 
     res.json({
       title,

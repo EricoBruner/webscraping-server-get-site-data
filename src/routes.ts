@@ -22,36 +22,84 @@ routes.get('/', async(req, res) => {
 		browser = await getBrowserInstance()
 		let page = await browser.newPage()
 		await page.goto(URL)
-    const title = await page.title()
+
+    const titleOne = await page.title()
+
+    const titleTwo = await page.evaluate(() => {
+      return ([...document.querySelectorAll('h2')]
+      .map((list) => {
+        const arrayList = list.innerText.split('\n')
+        for( var i=0; i < arrayList.length; i++ ) {
+          if(arrayList[i].match(/Dados do Cartorio De Registro De Imoveis Do/)) {
+            return arrayList
+          }
+        }
+      })
+      .find(list => list != null))
+    })
 
     const textPageOne = formattedText(await page.evaluate(() => 
-      document.querySelector('div > div > div > div.thecontent > p:nth-child(1)')
+      document.querySelector('div.thecontent > p:nth-child(1)')
       ?.textContent)
     );
     const textPageTwo = formattedText(await page.evaluate(() => 
-      document.querySelector('div > div > div > div.thecontent > p:nth-child(3)')
+      document.querySelector('div.thecontent > p:nth-child(3)')
       ?.textContent)
     );
-    //
+    
     const textPageThree = formattedText(await page.evaluate(() => 
-      document.querySelector('div > div > div > div.thecontent > p:nth-child(5)')
+      document.querySelector('div.thecontent > p:nth-child(5)')
       ?.textContent)
     );
 
-    // const textPageFour = await page.evaluate(() => 
-    //   document.querySelectorAll('ul').item(0).innerText)
-    
     const textPageFour = await page.evaluate(() => {
-      return ([...document.querySelectorAll('ul')][0].innerText.split('\n'))
+      return ([...document.querySelectorAll('p')]
+      .map((list) => {
+        const arrayList = list.innerText.split('\n')
+        for( var i=0; i < arrayList.length; i++ ) {
+          if(arrayList[i].match(/Confira abaixo todos os dados do/)) {
+            return arrayList
+          }
+        }
+      })
+      .find(list => list != null))
     })
-    
+
+    const listPageOne = await page.evaluate(() => {
+      return ([...document.querySelectorAll('ul')]
+      .map((list) => {
+        const arrayList = list.innerText.split('\n')
+        for( var i=0; i < arrayList.length; i++ ) {
+          if(arrayList[i] === 'Permutas' || arrayList[i] === 'Penhoras' || arrayList[i] === 'Usufruto' || arrayList[i] === 'Contratos') {
+            return arrayList
+          }
+        }
+      })
+      .find(list => list != null))
+    })
+
+    const listPageTwo = await page.evaluate(() => {
+      return ([...document.querySelectorAll('ul')]
+      .map((list) => {
+        const arrayList = list.innerText.split('\n ')
+        for( var i=0; i < arrayList.length; i++ ) {
+          if(arrayList[i] === ' Situação do cartório: Ativo' || arrayList[i] === ' Situação do cartório: Desativado') {
+            return arrayList
+          }
+        }
+      })
+      .find(list => list != null))
+    })
 
     res.json({
-      title,
+      titleOne,
+      titleTwo,
       textPageOne,
       textPageTwo,
       textPageThree,
       textPageFour,
+      listPageOne,
+      listPageTwo,
     })
   } catch (error) {
       console.log(error)

@@ -5,7 +5,7 @@ import { formattedText } from './utils/formattedText';
 
 export const routes = Router();
 
-routes.get('/', async(req, res) => {
+routes.post('/', async(req, res) => {
 
   const { URL } = req.body;
 
@@ -30,7 +30,7 @@ routes.get('/', async(req, res) => {
       .map((list) => {
         const arrayList = list.innerText.split('\n')
         for( var i=0; i < arrayList.length; i++ ) {
-          if(arrayList[i].match(/Dados do Cartorio De Registro De Imoveis Do/)) {
+          if(arrayList[i].match(/Dados/)) {
             return arrayList
           }
         }
@@ -81,15 +81,24 @@ routes.get('/', async(req, res) => {
     const listPageTwo = await page.evaluate(() => {
       return ([...document.querySelectorAll('ul')]
       .map((list) => {
-        const arrayList = list.innerText.split('\n ')
+        var arrayList = list.innerText.split('\n ')
         for( var i=0; i < arrayList.length; i++ ) {
-          if(arrayList[i] === ' Situação do cartório: Ativo' || arrayList[i] === ' Situação do cartório: Desativado') {
+          arrayList[i] = arrayList[i].trim()
+          if(arrayList[i] === 'Situação do cartório: Ativo' || arrayList[i] === 'Situação do cartório: Inativo') {
             return arrayList
           }
         }
       })
       .find(list => list != null))
     })
+
+    const listPageOneFormatted =  listPageOne.map((string:string) => {
+      return '<li>' + string + '</li>'
+    }).join('')
+
+    const listPageTwoFormatted = listPageTwo.map((string:string) => {
+      return '<li>' + string + '</li>'
+    }).join('')
 
     res.json({
       titleOne,
@@ -100,6 +109,8 @@ routes.get('/', async(req, res) => {
       textPageFour,
       listPageOne,
       listPageTwo,
+      listPageOneFormatted,
+      listPageTwoFormatted,
     })
   } catch (error) {
       console.log(error)

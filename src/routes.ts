@@ -23,6 +23,12 @@ routes.post('/', async(req, res) => {
 		let page = await browser.newPage()
 		await page.goto(URL)
 
+    const city = await page.evaluate(() => 
+      document.querySelector("div > div > header > div > span:nth-child(1) > a:nth-child(5)")?.textContent
+    );
+
+    const rideCity = 'ride' + city.replace(/ /g, "").normalize('NFD');
+
     const titleOne = await page.title()
 
     const titleTwo = await page.evaluate(() => {
@@ -101,6 +107,8 @@ routes.post('/', async(req, res) => {
     }).join('')
 
     res.json({
+      city,
+      rideCity,
       titleOne,
       titleTwo,
       textPageOne,
